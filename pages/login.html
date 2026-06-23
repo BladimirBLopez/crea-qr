@@ -8,17 +8,19 @@
   <script async crossorigin="anonymous" data-clerk-publishable-key="pk_test_cmFyZS10b2FkLTY1LmNsZXJrLmFjY291bnRzLmRldiQ" src="https://rare-toad-65.clerk.accounts.dev/npm/@clerk/clerk-js@latest/dist/clerk.browser.js" type="text/javascript"></script>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:'Inter',sans-serif;background:#f0f4f8;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
-    .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:22px;color:#1e293b;margin-bottom:32px;text-decoration:none}
-    .logo-icon{width:38px;height:38px;background:#1a73e8;border-radius:10px;display:flex;align-items:center;justify-content:center}
+    body{font-family:'Inter',sans-serif;background:#f0f4f8;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px}
+    .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px;color:#1e293b;margin-bottom:24px;text-decoration:none}
+    .logo-icon{width:36px;height:36px;background:#1a73e8;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
     .logo-icon svg{width:20px;height:20px;fill:white}
-    .card{background:white;border-radius:20px;padding:36px 32px;width:100%;max-width:420px;box-shadow:0 4px 24px rgba(0,0,0,0.08)}
-    .card-title{font-size:20px;font-weight:800;color:#1e293b;margin-bottom:6px;text-align:center}
-    .card-sub{font-size:14px;color:#64748b;text-align:center;margin-bottom:28px}
-    #clerk-sign-in{width:100%}
+    .card{background:white;border-radius:20px;padding:24px 20px;width:100%;max-width:400px;box-shadow:0 4px 24px rgba(0,0,0,0.08);overflow:hidden}
+    .card-title{font-size:18px;font-weight:800;color:#1e293b;margin-bottom:4px;text-align:center}
+    .card-sub{font-size:13px;color:#64748b;text-align:center;margin-bottom:20px}
+    #clerk-sign-in{width:100%;overflow:hidden}
+    .cl-rootBox,.cl-card{width:100%!important;box-shadow:none!important;padding:0!important}
     .loading{text-align:center;padding:40px;color:#94a3b8;font-size:14px}
     .spinner{width:32px;height:32px;border:3px solid #e2e8f0;border-top-color:#1a73e8;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
     @keyframes spin{to{transform:rotate(360deg)}}
+    @media(max-width:480px){body{padding:12px;justify-content:flex-start;padding-top:40px}.card{padding:20px 16px}}
   </style>
 </head>
 <body>
