@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CreaQR — Iniciar sesión</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: #f0f4f8; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; }
+    .logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 22px; color: #1e293b; margin-bottom: 32px; text-decoration: none; }
+    .logo-icon { width: 38px; height: 38px; background: #1a73e8; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+    .logo-icon svg { width: 20px; height: 20px; fill: white; }
+    .card { background: white; border-radius: 20px; padding: 36px 32px; width: 100%; max-width: 420px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+    .tabs { display: flex; background: #f0f4f8; border-radius: 10px; padding: 4px; margin-bottom: 28px; }
+    .tab { flex: 1; text-align: center; padding: 9px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; color: #64748b; transition: all 0.2s; border: none; background: none; }
+    .tab.active { background: white; color: #1e293b; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+    .form-group { margin-bottom: 16px; }
+    label { display: block; font-size: 13px; font-weight: 600; color: #1e293b; margin-bottom: 6px; }
+    input { width: 100%; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 14px; font-size: 15px; font-family: 'Inter', sans-serif; color: #1e293b; outline: none; transition: border 0.2s; }
+    input:focus { border-color: #1a73e8; box-shadow: 0 0 0 3px rgba(26,115,232,0.1); }
+    .btn { width: 100%; background: #34a853; color: white; padding: 14px; border-radius: 10px; font-size: 15px; font-weight: 700; border: none; cursor: pointer; margin-top: 8px; transition: background 0.2s; }
+    .btn:hover { background: #2d9249; }
+    .btn:disabled { background: #94a3b8; cursor: not-allowed; }
+    .error { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; padding: 12px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; display: none; }
+    .success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #16a34a; padding: 12px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; display: none; }
+    .divider { text-align: center; color: #94a3b8; font-size: 13px; margin: 16px 0; }
+    .terms { font-size: 12px; color: #94a3b8; text-align: center; margin-top: 16px; }
+  </style>
+</head>
+<body>
+  <a class="logo" href="../pages/index.html">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24"><path d="M3 3h7v7H3V3zm2 2v3h3V5H5zm9-2h7v7h-7V3zm2 2v3h3V5h-3zM3 14h7v7H3v-7zm2 2v3h3v-3H5zm11 0h2v2h-2v-2zm2-2h2v2h-2v-2zm-2 4h2v2h-2v-2zm2 0h2v2h-2v-2zm-4-4h2v2h-2v-2zm-2 2h2v2h-2v-2zm4 2h2v2h-2v-2z"/></svg>
+    </div>
+    CreaQR
+  </a>
+
+  <div class="card">
+    <div class="tabs">
+      <button class="tab active" id="tab-login" onclick="showTab('login')">Iniciar sesión</button>
+      <button class="tab" id="tab-register" onclick="showTab('register')">Registrarse</button>
+    </div>
+
+    <div id="msg-error" class="error"></div>
+    <div id="msg-success" class="success"></div>
+
+    <!-- LOGIN -->
+    <div id="form-login">
+      <div class="form-group">
+        <label>Correo electrónico</label>
+        <input type="email" id="login-email" placeholder="tucorreo@email.com" />
+      </div>
+      <div class="form-group">
+        <label>Contraseña</label>
+        <input type="password" id="login-pass" placeholder="••••••••" />
+      </div>
+      <button class="btn" id="btn-login" onclick="doLogin()">Iniciar sesión</button>
+    </div>
+
+    <!-- REGISTER -->
+    <div id="form-register" style="display:none">
+      <div class="form-group">
+        <label>Nombre completo</label>
+        <input type="text" id="reg-name" placeholder="Tu nombre" />
+      </div>
+      <div class="form-group">
+        <label>Correo electrónico</label>
+        <input type="email" id="reg-email" placeholder="tucorreo@email.com" />
+      </div>
+      <div class="form-group">
+        <label>Contraseña</label>
+        <input type="password" id="reg-pass" placeholder="Mínimo 6 caracteres" />
+      </div>
+      <button class="btn" id="btn-register" onclick="doRegister()">Crear cuenta gratis</button>
+      <p class="terms">Al registrarte aceptas nuestros términos de uso.</p>
+    </div>
+  </div>
+
+  <script>
+// CreaQR - Configuración JSONBin
+const JSONBIN_API_KEY = '$2a$10$YohijmJms8cH8Wcz7UPRoeLVTcuLN9GArGOh4xg3lwW8HWDTuBjlu';
+const JSONBIN_BASE = 'https://api.jsonbin.io/v3';
+
+// ─── USUARIOS ───────────────────────────────────────────────
+async function getBin(binId) {
+  const r = await fetch(`${JSONBIN_BASE}/b/${binId}/latest`, {
+    headers: { 'X-Master-Key': JSONBIN_API_KEY }
+  });
+  const d = await r.json();
+  return d.record;
+}
+
+async function updateBin(binId, data) {
+  await fetch(`${JSONBIN_BASE}/b/${binId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Master-Key': JSONBIN_API_KEY
+    },
+    body: JSON.stringify(data)
+  });
+}
+
+async function createBin(data, name) {
+  const r = await fetch(`${JSONBIN_BASE}/b`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Master-Key': JSONBIN_API_KEY,
+      'X-Bin-Name': name,
+      'X-Bin-Private': 'true'
+    },
+    body: JSON.stringify(data)
+  });
+  const d = await r.json();
+  return d.metadata.id;
+}
+
+// ─── AUTH ────────────────────────────────────────────────────
+async function getUsersBinId() {
+  // Guardamos el ID del bin de usuarios en localStorage
+  let id = localStorage.getItem('creaQR_usersBin');
+  if (!id) {
+    // Buscar bins existentes
+    try {
+      const r = await fetch(`${JSONBIN_BASE}/b`, {
+        headers: { 'X-Master-Key': JSONBIN_API_KEY }
+      });
+      const d = await r.json();
+      const found = d.find && d.find(b => b.snippetMeta?.name === 'creaQR_users');
+      if (found) { id = found.id; localStorage.setItem('creaQR_usersBin', id); }
+    } catch(e) {}
+  }
+  if (!id) {
+    id = await createBin({ users: [] }, 'creaQR_users');
+    localStorage.setItem('creaQR_usersBin', id);
+  }
+  return id;
+}
+
+async function register(name, email, password) {
+  const binId = await getUsersBinId();
+  const data = await getBin(binId);
+  const users = data.users || [];
+  if (users.find(u => u.email === email)) throw new Error('Este email ya está registrado');
+  const user = { id: 'u_' + Date.now(), name, email, password: btoa(password), qrsBinId: null, createdAt: new Date().toISOString() };
+  users.push(user);
+  await updateBin(binId, { users });
+  const sessionUser = { id: user.id, name: user.name, email: user.email, qrsBinId: null };
+  localStorage.setItem('creaQR_session', JSON.stringify(sessionUser));
+  return sessionUser;
+}
+
+async function login(email, password) {
+  const binId = await getUsersBinId();
+  const data = await getBin(binId);
+  const users = data.users || [];
+  const user = users.find(u => u.email === email && u.password === btoa(password));
+  if (!user) throw new Error('Email o contraseña incorrectos');
+  const sessionUser = { id: user.id, name: user.name, email: user.email, qrsBinId: user.qrsBinId };
+  localStorage.setItem('creaQR_session', JSON.stringify(sessionUser));
+  return sessionUser;
+}
+
+function logout() {
+  localStorage.removeItem('creaQR_session');
+  window.location.href = 'login.html';
+}
+
+function getSession() {
+  const s = localStorage.getItem('creaQR_session');
+  return s ? JSON.parse(s) : null;
+}
+
+function requireAuth() {
+  const s = getSession();
+  if (!s) window.location.href = 'login.html';
+  return s;
+}
+
+// ─── QRs ─────────────────────────────────────────────────────
+async function getUserQrsBinId(user) {
+  if (user.qrsBinId) return user.qrsBinId;
+  // Crear bin de QRs para este usuario
+  const binId = await createBin({ qrs: [] }, `creaQR_qrs_${user.id}`);
+  // Actualizar usuario en users bin
+  const usersBinId = await getUsersBinId();
+  const data = await getBin(usersBinId);
+  const users = data.users || [];
+  const idx = users.findIndex(u => u.id === user.id);
+  if (idx !== -1) { users[idx].qrsBinId = binId; await updateBin(usersBinId, { users }); }
+  // Actualizar sesión
+  user.qrsBinId = binId;
+  localStorage.setItem('creaQR_session', JSON.stringify(user));
+  return binId;
+}
+
+async function getMyQRs() {
+  const user = getSession();
+  if (!user) return [];
+  const binId = await getUserQrsBinId(user);
+  const data = await getBin(binId);
+  return data.qrs || [];
+}
+
+async function saveQR(qrData) {
+  const user = getSession();
+  const binId = await getUserQrsBinId(user);
+  const data = await getBin(binId);
+  const qrs = data.qrs || [];
+  const newQR = { id: 'qr_' + Date.now(), ...qrData, userId: user.id, createdAt: new Date().toISOString(), scans: 0 };
+  qrs.unshift(newQR);
+  await updateBin(binId, { qrs });
+  return newQR;
+}
+
+async function deleteQR(qrId) {
+  const user = getSession();
+  const binId = await getUserQrsBinId(user);
+  const data = await getBin(binId);
+  const qrs = (data.qrs || []).filter(q => q.id !== qrId);
+  await updateBin(binId, { qrs });
+}
+
+async function updateQR(qrId, updates) {
+  const user = getSession();
+  const binId = await getUserQrsBinId(user);
+  const data = await getBin(binId);
+  const qrs = data.qrs || [];
+  const idx = qrs.findIndex(q => q.id === qrId);
+  if (idx !== -1) { qrs[idx] = { ...qrs[idx], ...updates, updatedAt: new Date().toISOString() }; }
+  await updateBin(binId, { qrs });
+}
+
+</script>
+  <script>
+    // Si ya hay sesión, ir al dashboard
+    if (getSession()) window.location.href = 'dashboard.html';
+
+    function showTab(t) {
+      document.getElementById('form-login').style.display = t === 'login' ? 'block' : 'none';
+      document.getElementById('form-register').style.display = t === 'register' ? 'block' : 'none';
+      document.getElementById('tab-login').classList.toggle('active', t === 'login');
+      document.getElementById('tab-register').classList.toggle('active', t === 'register');
+      hideMessages();
+    }
+
+    function showError(msg) {
+      const el = document.getElementById('msg-error');
+      el.textContent = msg; el.style.display = 'block';
+      document.getElementById('msg-success').style.display = 'none';
+    }
+    function showSuccess(msg) {
+      const el = document.getElementById('msg-success');
+      el.textContent = msg; el.style.display = 'block';
+      document.getElementById('msg-error').style.display = 'none';
+    }
+    function hideMessages() {
+      document.getElementById('msg-error').style.display = 'none';
+      document.getElementById('msg-success').style.display = 'none';
+    }
+
+    async function doLogin() {
+      const email = document.getElementById('login-email').value.trim();
+      const pass = document.getElementById('login-pass').value;
+      if (!email || !pass) return showError('Completa todos los campos');
+      const btn = document.getElementById('btn-login');
+      btn.disabled = true; btn.textContent = 'Ingresando...';
+      try {
+        await login(email, pass);
+        window.location.href = 'dashboard.html';
+      } catch(e) {
+        showError(e.message);
+        btn.disabled = false; btn.textContent = 'Iniciar sesión';
+      }
+    }
+
+    async function doRegister() {
+      const name = document.getElementById('reg-name').value.trim();
+      const email = document.getElementById('reg-email').value.trim();
+      const pass = document.getElementById('reg-pass').value;
+      if (!name || !email || !pass) return showError('Completa todos los campos');
+      if (pass.length < 6) return showError('La contraseña debe tener al menos 6 caracteres');
+      const btn = document.getElementById('btn-register');
+      btn.disabled = true; btn.textContent = 'Creando cuenta...';
+      try {
+        await register(name, email, pass);
+        showSuccess('¡Cuenta creada! Redirigiendo...');
+        setTimeout(() => window.location.href = 'dashboard.html', 1200);
+      } catch(e) {
+        showError(e.message);
+        btn.disabled = false; btn.textContent = 'Crear cuenta gratis';
+      }
+    }
+
+    // Enter key
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        if (document.getElementById('form-login').style.display !== 'none') doLogin();
+        else doRegister();
+      }
+    });
+  </script>
+</body>
+</html>
