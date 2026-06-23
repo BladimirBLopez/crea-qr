@@ -1,91 +1,145 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>CreaQR — Crear código QR</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Inter', sans-serif; background: #f0f4f8; min-height: 100vh; }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--blue:#1a73e8;--green:#34a853;--dark:#1e293b;--mid:#475569;--light:#94a3b8;--border:#e2e8f0;--bg:#f0f4f8;--white:#fff}
+    body{font-family:'Inter',sans-serif;background:var(--bg);min-height:100vh;color:var(--dark)}
 
-    nav { background: white; border-bottom: 1px solid #e2e8f0; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; height: 58px; position: sticky; top: 0; z-index: 100; }
-    .logo { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 17px; color: #1e293b; text-decoration: none; }
-    .logo-icon { width: 32px; height: 32px; background: #1a73e8; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
-    .logo-icon svg { width: 18px; height: 18px; fill: white; }
-    .btn-back { font-size: 13px; color: #475569; text-decoration: none; font-weight: 500; display: flex; align-items: center; gap: 4px; }
+    /* NAV */
+    nav{background:var(--white);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:58px;position:sticky;top:0;z-index:100}
+    .logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:17px;color:var(--dark);text-decoration:none}
+    .logo-icon{width:32px;height:32px;background:var(--blue);border-radius:8px;display:flex;align-items:center;justify-content:center}
+    .logo-icon svg{width:18px;height:18px;fill:white}
+    .btn-back{font-size:13px;color:var(--mid);text-decoration:none;font-weight:500;display:flex;align-items:center;gap:4px;padding:8px 14px;border:1px solid var(--border);border-radius:8px}
 
-    main { max-width: 820px; margin: 0 auto; padding: 28px 20px 60px; }
+    /* PROGRESS BAR */
+    .progress-wrap{background:var(--white);border-bottom:1px solid var(--border);padding:16px 20px}
+    .progress-inner{max-width:700px;margin:0 auto}
+    .steps-row{display:flex;align-items:center;justify-content:space-between;position:relative}
+    .steps-row::before{content:'';position:absolute;top:16px;left:0;right:0;height:2px;background:var(--border);z-index:0}
+    .progress-fill{position:absolute;top:16px;left:0;height:2px;background:var(--blue);z-index:1;transition:width .4s ease}
+    .step-item{display:flex;flex-direction:column;align-items:center;gap:6px;position:relative;z-index:2}
+    .step-circle{width:32px;height:32px;border-radius:50%;border:2px solid var(--border);background:var(--white);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--light);transition:all .3s}
+    .step-circle.active{border-color:var(--blue);color:var(--blue);background:#eff6ff}
+    .step-circle.done{border-color:var(--green);background:var(--green);color:white}
+    .step-name{font-size:10px;font-weight:600;color:var(--light);white-space:nowrap;transition:color .3s}
+    .step-name.active{color:var(--blue)}
+    .step-name.done{color:var(--green)}
 
-    /* STEPS INDICATOR */
-    .steps-indicator { display: flex; align-items: center; margin-bottom: 32px; }
-    .step-dot { width: 32px; height: 32px; border-radius: 50%; border: 2px solid #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #94a3b8; background: white; flex-shrink: 0; transition: all 0.3s; }
-    .step-dot.active { border-color: #1a73e8; color: #1a73e8; background: #eff6ff; }
-    .step-dot.done { border-color: #34a853; background: #34a853; color: white; }
-    .step-line { flex: 1; height: 2px; background: #e2e8f0; margin: 0 8px; transition: background 0.3s; }
-    .step-line.done { background: #34a853; }
-    .step-label { font-size: 11px; color: #94a3b8; text-align: center; margin-top: 4px; }
+    /* MAIN */
+    main{max-width:900px;margin:0 auto;padding:28px 16px 80px}
 
     /* PANELS */
-    .panel { background: white; border: 1px solid #e2e8f0; border-radius: 20px; padding: 28px 24px; }
-    .panel-title { font-size: 18px; font-weight: 800; color: #1e293b; margin-bottom: 6px; }
-    .panel-sub { font-size: 14px; color: #64748b; margin-bottom: 24px; }
+    .panel{background:var(--white);border:1px solid var(--border);border-radius:20px;padding:28px 24px;display:none}
+    .panel.active{display:block}
+    .panel-title{font-size:20px;font-weight:800;color:var(--dark);margin-bottom:4px}
+    .panel-sub{font-size:14px;color:var(--light);margin-bottom:28px}
 
-    /* STEP 1 - TYPES */
-    .type-list { display: flex; flex-direction: column; gap: 10px; }
-    .type-item { display: flex; align-items: center; gap: 16px; padding: 16px; border: 2px solid #e2e8f0; border-radius: 12px; cursor: pointer; transition: all 0.2s; }
-    .type-item:hover { border-color: #1a73e8; background: #f8faff; }
-    .type-item.selected { border-color: #1a73e8; background: #eff6ff; }
-    .type-icon { width: 44px; height: 44px; border-radius: 10px; background: #f0f4f8; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
-    .type-item.selected .type-icon { background: #dbeafe; }
-    .type-text h3 { font-size: 14px; font-weight: 700; color: #1e293b; margin-bottom: 2px; }
-    .type-text p { font-size: 12px; color: #64748b; }
+    /* STEP 1 - TIPO */
+    .section-label{font-size:11px;font-weight:700;color:var(--light);text-transform:uppercase;letter-spacing:.8px;margin:20px 0 10px}
+    .section-label:first-child{margin-top:0}
+    .types-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+    .type-card{display:flex;align-items:center;gap:12px;padding:14px 16px;border:2px solid var(--border);border-radius:12px;cursor:pointer;transition:all .2s;user-select:none}
+    .type-card:hover{border-color:var(--blue);background:#f8faff;transform:translateY(-1px)}
+    .type-card.selected{border-color:var(--blue);background:#eff6ff}
+    .type-card .tc-icon{width:40px;height:40px;border-radius:10px;background:#f0f4f8;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;transition:background .2s}
+    .type-card.selected .tc-icon{background:#dbeafe}
+    .type-card .tc-text h4{font-size:13px;font-weight:700;color:var(--dark);margin-bottom:1px}
+    .type-card .tc-text p{font-size:11px;color:var(--light)}
 
     /* STEP 2 - FORM */
-    .form-group { margin-bottom: 16px; }
-    label { display: block; font-size: 13px; font-weight: 600; color: #1e293b; margin-bottom: 6px; }
-    input, textarea, select { width: 100%; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 14px; font-size: 14px; font-family: 'Inter', sans-serif; color: #1e293b; outline: none; transition: border 0.2s; background: white; }
-    input:focus, textarea:focus, select:focus { border-color: #1a73e8; box-shadow: 0 0 0 3px rgba(26,115,232,0.1); }
-    textarea { resize: vertical; min-height: 90px; }
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .form-grid.single{grid-template-columns:1fr}
+    .form-group{display:flex;flex-direction:column;gap:6px}
+    .form-group.full{grid-column:1/-1}
+    label{font-size:13px;font-weight:600;color:var(--dark)}
+    .sublabel{font-size:11px;color:var(--light);margin-top:-4px}
+    input[type=text],input[type=url],input[type=email],input[type=tel],input[type=password],textarea,select{border:1px solid var(--border);border-radius:10px;padding:11px 14px;font-size:14px;font-family:'Inter',sans-serif;color:var(--dark);outline:none;transition:border .2s;width:100%;background:white}
+    input:focus,textarea:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,115,232,.1)}
+    textarea{resize:vertical;min-height:80px}
+    .input-icon-wrap{position:relative}
+    .input-icon-wrap input{padding-left:38px}
+    .input-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:16px}
+    .qr-name-box{background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:20px}
+    .qr-name-box label{font-size:12px;color:var(--light);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;display:block}
+    .qr-name-box input{background:white}
+    .social-item{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+    .social-item .s-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;background:#f0f4f8}
+    .social-item input{flex:1}
+    .add-social{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--blue);font-weight:600;cursor:pointer;margin-top:4px;background:none;border:none;padding:0}
 
-    /* STEP 3 - CUSTOMIZE */
-    .customize-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    .color-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid #e2e8f0; border-radius: 10px; }
-    .color-row input[type="color"] { width: 36px; height: 36px; border: none; border-radius: 6px; padding: 0; cursor: pointer; }
-    .color-row span { font-size: 13px; font-weight: 500; color: #475569; }
-    .preview-box { text-align: center; }
-    .preview-label { font-size: 12px; color: #94a3b8; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-    #qr-preview { width: 160px; height: 160px; border: 1px solid #e2e8f0; border-radius: 12px; margin: 0 auto; overflow: hidden; background: white; display: flex; align-items: center; justify-content: center; }
+    /* STEP 3 - DISEÑO */
+    .design-layout{display:grid;grid-template-columns:1fr 260px;gap:24px;align-items:start}
+    .design-options{}
+    .design-section{margin-bottom:24px}
+    .design-section-title{font-size:13px;font-weight:700;color:var(--dark);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+    .color-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .color-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:10px}
+    .color-item input[type=color]{width:32px;height:32px;border:none;border-radius:6px;padding:0;cursor:pointer;flex-shrink:0}
+    .color-item span{font-size:12px;font-weight:500;color:var(--mid)}
+    .dot-styles{display:flex;gap:8px;flex-wrap:wrap}
+    .dot-style{width:44px;height:44px;border:2px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;background:white}
+    .dot-style.active{border-color:var(--blue);background:#eff6ff}
+    .dot-style svg{width:28px;height:28px}
+    .corner-styles{display:flex;gap:8px;flex-wrap:wrap}
+    .corner-style{width:44px;height:44px;border:2px solid var(--border);border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;background:white}
+    .corner-style.active{border-color:var(--blue);background:#eff6ff}
+    .corner-style svg{width:28px;height:28px}
+    .logo-upload-box{border:2px dashed var(--border);border-radius:12px;padding:20px;text-align:center;cursor:pointer;transition:all .2s}
+    .logo-upload-box:hover{border-color:var(--blue);background:#f8faff}
+    .logo-upload-box p{font-size:13px;color:var(--light);margin-top:6px}
+    .logo-preview{display:flex;align-items:center;gap:10px;padding:10px;background:#f8fafc;border-radius:10px;border:1px solid var(--border)}
+    .logo-preview img{width:40px;height:40px;border-radius:6px;object-fit:contain}
+    .logo-preview span{font-size:12px;color:var(--mid);flex:1}
+    .btn-remove-logo{background:none;border:none;color:#dc2626;cursor:pointer;font-size:13px;font-weight:600}
 
-    /* STEP 4 - DONE */
-    .done-box { text-align: center; padding: 20px 0; }
-    .done-icon { font-size: 52px; margin-bottom: 16px; }
-    .done-box h2 { font-size: 22px; font-weight: 800; color: #1e293b; margin-bottom: 8px; }
-    .done-box p { font-size: 14px; color: #64748b; margin-bottom: 24px; }
-    #final-qr { width: 200px; height: 200px; border: 1px solid #e2e8f0; border-radius: 16px; margin: 0 auto 24px; overflow: hidden; background: white; display: flex; align-items: center; justify-content: center; }
+    /* QR PREVIEW */
+    .preview-sticky{position:sticky;top:80px}
+    .preview-card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:20px;text-align:center}
+    .preview-card-title{font-size:11px;font-weight:700;color:var(--light);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px}
+    #qr-canvas-wrap{width:200px;height:200px;margin:0 auto 16px;border-radius:12px;overflow:hidden;background:white;display:flex;align-items:center;justify-content:center;border:1px solid var(--border)}
+    .preview-name{font-size:13px;font-weight:600;color:var(--dark);margin-bottom:4px;min-height:18px}
+    .preview-type{font-size:11px;color:var(--light)}
+
+    /* STEP 4 - LISTO */
+    .done-wrap{text-align:center;padding:20px 0}
+    .done-icon{font-size:56px;margin-bottom:16px;display:block}
+    .done-wrap h2{font-size:24px;font-weight:800;margin-bottom:8px}
+    .done-wrap p{font-size:14px;color:var(--mid);margin-bottom:28px}
+    #final-qr-wrap{width:220px;height:220px;margin:0 auto 28px;border-radius:16px;overflow:hidden;background:white;border:1px solid var(--border);display:flex;align-items:center;justify-content:center}
+    .done-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
 
     /* BUTTONS */
-    .btn-row { display: flex; gap: 10px; margin-top: 24px; }
-    .btn-primary { flex: 1; background: #34a853; color: white; padding: 13px; border-radius: 10px; font-size: 15px; font-weight: 700; border: none; cursor: pointer; transition: background 0.2s; }
-    .btn-primary:hover { background: #2d9249; }
-    .btn-primary:disabled { background: #94a3b8; cursor: not-allowed; }
-    .btn-secondary { flex: 1; background: white; color: #475569; padding: 13px; border-radius: 10px; font-size: 15px; font-weight: 600; border: 2px solid #e2e8f0; cursor: pointer; transition: all 0.2s; }
-    .btn-secondary:hover { border-color: #475569; }
-    .btn-blue { background: #1a73e8; color: white; padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 700; border: none; cursor: pointer; transition: background 0.2s; }
-    .btn-blue:hover { background: #1557c0; }
-    .btn-outline { background: white; color: #1a73e8; padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 700; border: 2px solid #1a73e8; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-block; }
-    .btn-outline:hover { background: #1a73e8; color: white; }
+    .btn-row{display:flex;gap:10px;margin-top:28px}
+    .btn-primary{background:var(--green);color:white;padding:13px 24px;border-radius:10px;font-size:15px;font-weight:700;border:none;cursor:pointer;transition:background .2s;flex:1}
+    .btn-primary:hover{background:#2d9249}
+    .btn-primary:disabled{background:var(--light);cursor:not-allowed}
+    .btn-secondary{background:white;color:var(--mid);padding:13px 24px;border-radius:10px;font-size:15px;font-weight:600;border:2px solid var(--border);cursor:pointer;transition:all .2s}
+    .btn-secondary:hover{border-color:var(--mid)}
+    .btn-dl{background:var(--blue);color:white;padding:12px 24px;border-radius:10px;font-size:14px;font-weight:700;border:none;cursor:pointer;transition:background .2s}
+    .btn-dl:hover{background:#1557c0}
+    .btn-outline{background:white;color:var(--blue);padding:12px 24px;border-radius:10px;font-size:14px;font-weight:700;border:2px solid var(--blue);cursor:pointer;transition:all .2s;text-decoration:none;display:inline-block}
+    .btn-outline:hover{background:var(--blue);color:white}
+    .btn-ghost{background:white;color:var(--mid);padding:12px 24px;border-radius:10px;font-size:14px;font-weight:600;border:2px solid var(--border);cursor:pointer;text-decoration:none;display:inline-block}
 
-    .name-input-group { margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #e2e8f0; }
-    .name-input-group label { font-size: 12px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
+    /* ERROR / TOAST */
+    .field-error{font-size:11px;color:#dc2626;margin-top:2px;display:none}
+    input.error,textarea.error{border-color:#dc2626}
+    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--dark);color:white;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+    .toast.show{opacity:1}
 
-    /* TOAST */
-    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 12px 20px; border-radius: 10px; font-size: 13px; font-weight: 500; z-index: 999; opacity: 0; transition: opacity 0.3s; pointer-events: none; white-space: nowrap; }
-    .toast.show { opacity: 1; }
-
-    @media (max-width: 500px) {
-      .customize-grid { grid-template-columns: 1fr; }
+    @media(max-width:640px){
+      .form-grid{grid-template-columns:1fr}
+      .form-group.full{grid-column:1}
+      .design-layout{grid-template-columns:1fr}
+      .preview-sticky{position:static}
+      .types-grid{grid-template-columns:1fr 1fr}
     }
   </style>
 </head>
@@ -99,189 +153,374 @@
   <a class="btn-back" href="dashboard.html">← Mis QRs</a>
 </nav>
 
+<!-- PROGRESS -->
+<div class="progress-wrap">
+  <div class="progress-inner">
+    <div class="steps-row">
+      <div class="progress-fill" id="prog-fill" style="width:0%"></div>
+      <div class="step-item">
+        <div class="step-circle active" id="sc-1">1</div>
+        <span class="step-name active" id="sn-1">Tipo</span>
+      </div>
+      <div class="step-item">
+        <div class="step-circle" id="sc-2">2</div>
+        <span class="step-name" id="sn-2">Contenido</span>
+      </div>
+      <div class="step-item">
+        <div class="step-circle" id="sc-3">3</div>
+        <span class="step-name" id="sn-3">Diseño</span>
+      </div>
+      <div class="step-item">
+        <div class="step-circle" id="sc-4">✓</div>
+        <span class="step-name" id="sn-4">Listo</span>
+      </div>
+    </div>
+  </div>
+</div>
+
 <main>
-  <!-- STEPS INDICATOR -->
-  <div style="max-width:400px;margin:0 auto 28px">
-    <div class="steps-indicator">
-      <div>
-        <div class="step-dot active" id="dot-1">1</div>
-      </div>
-      <div class="step-line" id="line-1"></div>
-      <div>
-        <div class="step-dot" id="dot-2">2</div>
-      </div>
-      <div class="step-line" id="line-2"></div>
-      <div>
-        <div class="step-dot" id="dot-3">3</div>
-      </div>
-      <div class="step-line" id="line-3"></div>
-      <div>
-        <div class="step-dot" id="dot-4">✓</div>
-      </div>
-    </div>
-    <div style="display:flex;justify-content:space-between;margin-top:6px">
-      <span style="font-size:10px;color:#94a3b8">Tipo</span>
-      <span style="font-size:10px;color:#94a3b8">Contenido</span>
-      <span style="font-size:10px;color:#94a3b8">Diseño</span>
-      <span style="font-size:10px;color:#94a3b8">Listo</span>
-    </div>
-  </div>
 
-  <!-- STEP 1: TIPO -->
-  <div id="step-1" class="panel">
-    <div class="panel-title">1. Selecciona el tipo de QR</div>
-    <div class="panel-sub">¿Qué quieres que haga tu código QR?</div>
-    <div class="type-list">
-      <div class="type-item" onclick="selectType('url','URL / Sitio web','🔗')">
-        <div class="type-icon">🔗</div>
-        <div class="type-text"><h3>URL / Sitio web</h3><p>Enlace a cualquier página web</p></div>
-      </div>
-      <div class="type-item" onclick="selectType('vcard','vCard / Contacto','👤')">
-        <div class="type-icon">👤</div>
-        <div class="type-text"><h3>vCard / Contacto</h3><p>Comparte tu tarjeta de visita virtual</p></div>
-      </div>
-      <div class="type-item" onclick="selectType('text','Texto','📄')">
-        <div class="type-icon">📄</div>
-        <div class="type-text"><h3>Texto libre</h3><p>Muestra cualquier mensaje de texto</p></div>
-      </div>
-      <div class="type-item" onclick="selectType('email','Email','📧')">
-        <div class="type-icon">📧</div>
-        <div class="type-text"><h3>Email</h3><p>Abre un correo pre-rellenado</p></div>
-      </div>
-      <div class="type-item" onclick="selectType('tel','Teléfono','📱')">
-        <div class="type-icon">📱</div>
-        <div class="type-text"><h3>Teléfono</h3><p>Llama a un número al instante</p></div>
-      </div>
-      <div class="type-item" onclick="selectType('wifi','WiFi','📶')">
-        <div class="type-icon">📶</div>
-        <div class="type-text"><h3>WiFi</h3><p>Conecta sin escribir la contraseña</p></div>
-      </div>
-      <div class="type-item" onclick="selectType('whatsapp','WhatsApp','💬')">
-        <div class="type-icon">💬</div>
-        <div class="type-text"><h3>WhatsApp</h3><p>Abre un chat de WhatsApp directo</p></div>
-      </div>
-      <div class="type-item" onclick="selectType('maps','Ubicación / Maps','📍')">
-        <div class="type-icon">📍</div>
-        <div class="type-text"><h3>Ubicación / Maps</h3><p>Muestra una dirección en Google Maps</p></div>
-      </div>
+<!-- PANEL 1: TIPO -->
+<div class="panel active" id="panel-1">
+  <div class="panel-title">1. Selecciona el tipo de QR</div>
+  <div class="panel-sub">¿Qué quieres que haga tu código QR?</div>
+
+  <div class="section-label">Más populares</div>
+  <div class="types-grid">
+    <div class="type-card" onclick="selectType('url','URL / Sitio web','🔗','Enlace a cualquier web')">
+      <div class="tc-icon">🔗</div>
+      <div class="tc-text"><h4>URL</h4><p>Sitio web</p></div>
+    </div>
+    <div class="type-card" onclick="selectType('vcard','vCard / Contacto','👤','Tarjeta de visita virtual')">
+      <div class="tc-icon">👤</div>
+      <div class="tc-text"><h4>vCard</h4><p>Contacto</p></div>
+    </div>
+    <div class="type-card" onclick="selectType('social','Redes sociales','📱','Tus perfiles sociales')">
+      <div class="tc-icon">📱</div>
+      <div class="tc-text"><h4>Redes sociales</h4><p>Todos tus perfiles</p></div>
+    </div>
+    <div class="type-card" onclick="selectType('empresa','Página de empresa','🏢','Info de tu negocio')">
+      <div class="tc-icon">🏢</div>
+      <div class="tc-text"><h4>Empresa</h4><p>Tu negocio</p></div>
     </div>
   </div>
 
-  <!-- STEP 2: CONTENIDO -->
-  <div id="step-2" class="panel" style="display:none">
-    <div class="panel-title">2. Agrega el contenido</div>
-    <div class="panel-sub" id="step2-sub">Ingresa los datos para tu QR.</div>
-
-    <div class="name-input-group">
-      <label>Nombre del QR (para identificarlo)</label>
-      <input type="text" id="qr-name" placeholder="Ej: Mi web personal, QR tienda..." />
+  <div class="section-label">Multimedia</div>
+  <div class="types-grid">
+    <div class="type-card" onclick="selectType('video','Vídeo','🎥','Comparte un video')">
+      <div class="tc-icon">🎥</div>
+      <div class="tc-text"><h4>Vídeo</h4><p>YouTube / Vimeo</p></div>
     </div>
-
-    <!-- URL -->
-    <div id="fields-url" class="fields" style="display:none">
-      <div class="form-group"><label>URL del sitio web</label><input type="url" id="f-url" placeholder="https://tusitioweb.com" /></div>
+    <div class="type-card" onclick="selectType('mp3','MP3 / Audio','🎵','Música o podcast')">
+      <div class="tc-icon">🎵</div>
+      <div class="tc-text"><h4>MP3 / Audio</h4><p>Música o podcast</p></div>
     </div>
-
-    <!-- VCARD -->
-    <div id="fields-vcard" class="fields" style="display:none">
-      <div class="form-group"><label>Nombre completo</label><input type="text" id="f-vcard-name" placeholder="Juan Pérez" /></div>
-      <div class="form-group"><label>Teléfono</label><input type="tel" id="f-vcard-tel" placeholder="+591 600 000 000" /></div>
-      <div class="form-group"><label>Email</label><input type="email" id="f-vcard-email" placeholder="juan@email.com" /></div>
-      <div class="form-group"><label>Empresa (opcional)</label><input type="text" id="f-vcard-company" placeholder="Mi Empresa S.A." /></div>
-      <div class="form-group"><label>Sitio web (opcional)</label><input type="url" id="f-vcard-web" placeholder="https://miweb.com" /></div>
-    </div>
-
-    <!-- TEXT -->
-    <div id="fields-text" class="fields" style="display:none">
-      <div class="form-group"><label>Texto</label><textarea id="f-text" placeholder="Escribe el mensaje que quieres mostrar..."></textarea></div>
-    </div>
-
-    <!-- EMAIL -->
-    <div id="fields-email" class="fields" style="display:none">
-      <div class="form-group"><label>Correo electrónico</label><input type="email" id="f-email" placeholder="contacto@empresa.com" /></div>
-      <div class="form-group"><label>Asunto (opcional)</label><input type="text" id="f-email-subject" placeholder="Hola, me interesa..." /></div>
-      <div class="form-group"><label>Mensaje (opcional)</label><textarea id="f-email-body" placeholder="Escribe el mensaje..."></textarea></div>
-    </div>
-
-    <!-- TEL -->
-    <div id="fields-tel" class="fields" style="display:none">
-      <div class="form-group"><label>Número de teléfono</label><input type="tel" id="f-tel" placeholder="+591 600 000 000" /></div>
-    </div>
-
-    <!-- WIFI -->
-    <div id="fields-wifi" class="fields" style="display:none">
-      <div class="form-group"><label>Nombre de la red (SSID)</label><input type="text" id="f-wifi-ssid" placeholder="MiRedWiFi" /></div>
-      <div class="form-group"><label>Contraseña</label><input type="text" id="f-wifi-pass" placeholder="contraseña123" /></div>
-      <div class="form-group"><label>Seguridad</label>
-        <select id="f-wifi-sec"><option value="WPA">WPA/WPA2</option><option value="WEP">WEP</option><option value="nopass">Sin contraseña</option></select>
-      </div>
-    </div>
-
-    <!-- WHATSAPP -->
-    <div id="fields-whatsapp" class="fields" style="display:none">
-      <div class="form-group"><label>Número de WhatsApp (con código de país)</label><input type="tel" id="f-wa-tel" placeholder="+591 600 000 000" /></div>
-      <div class="form-group"><label>Mensaje predeterminado (opcional)</label><textarea id="f-wa-msg" placeholder="Hola! Me interesa tu servicio..."></textarea></div>
-    </div>
-
-    <!-- MAPS -->
-    <div id="fields-maps" class="fields" style="display:none">
-      <div class="form-group"><label>Dirección o coordenadas</label><input type="text" id="f-maps" placeholder="Av. Camacho 123, La Paz, Bolivia" /></div>
-    </div>
-
-    <div class="btn-row">
-      <button class="btn-secondary" onclick="goStep(1)">← Atrás</button>
-      <button class="btn-primary" onclick="goStep(3)">Siguiente →</button>
+    <div class="type-card" onclick="selectType('apps','Aplicación','📲','Link a tu app')">
+      <div class="tc-icon">📲</div>
+      <div class="tc-text"><h4>Aplicación</h4><p>App Store / Play</p></div>
     </div>
   </div>
 
-  <!-- STEP 3: DISEÑO -->
-  <div id="step-3" class="panel" style="display:none">
-    <div class="panel-title">3. Personaliza el diseño</div>
-    <div class="panel-sub">Elige los colores de tu QR.</div>
-    <div class="customize-grid">
-      <div>
-        <div class="form-group">
-          <label>Color del código QR</label>
-          <div class="color-row">
-            <input type="color" id="c-fg" value="#000000" oninput="updatePreview()" />
-            <span>Color principal</span>
+  <div class="section-label">Comunicación</div>
+  <div class="types-grid">
+    <div class="type-card" onclick="selectType('whatsapp','WhatsApp','💬','Chat directo')">
+      <div class="tc-icon">💬</div>
+      <div class="tc-text"><h4>WhatsApp</h4><p>Chat directo</p></div>
+    </div>
+    <div class="type-card" onclick="selectType('email','Email','📧','Correo electrónico')">
+      <div class="tc-icon">📧</div>
+      <div class="tc-text"><h4>Email</h4><p>Enviar correo</p></div>
+    </div>
+    <div class="type-card" onclick="selectType('tel','Teléfono','📞','Llamada directa')">
+      <div class="tc-icon">📞</div>
+      <div class="tc-text"><h4>Teléfono</h4><p>Llamada directa</p></div>
+    </div>
+    <div class="type-card" onclick="selectType('sms','SMS','✉️','Mensaje de texto')">
+      <div class="tc-icon">✉️</div>
+      <div class="tc-text"><h4>SMS</h4><p>Mensaje de texto</p></div>
+    </div>
+  </div>
+
+  <div class="section-label">Otros</div>
+  <div class="types-grid">
+    <div class="type-card" onclick="selectType('wifi','WiFi','📶','Conectar a red')">
+      <div class="tc-icon">📶</div>
+      <div class="tc-text"><h4>WiFi</h4><p>Conectar a red</p></div>
+    </div>
+    <div class="type-card" onclick="selectType('maps','Ubicación','📍','Google Maps')">
+      <div class="tc-icon">📍</div>
+      <div class="tc-text"><h4>Ubicación</h4><p>Google Maps</p></div>
+    </div>
+    <div class="type-card" onclick="selectType('text','Texto','📄','Mensaje libre')">
+      <div class="tc-icon">📄</div>
+      <div class="tc-text"><h4>Texto</h4><p>Mensaje libre</p></div>
+    </div>
+    <div class="type-card" onclick="selectType('pdf','PDF','📑','Documento PDF')">
+      <div class="tc-icon">📑</div>
+      <div class="tc-text"><h4>PDF</h4><p>Documento</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- PANEL 2: CONTENIDO -->
+<div class="panel" id="panel-2">
+  <div class="panel-title" id="p2-title">2. Agrega el contenido</div>
+  <div class="panel-sub" id="p2-sub">Ingresa los datos para tu QR.</div>
+
+  <div class="qr-name-box">
+    <label>Nombre del QR (para identificarlo en tu dashboard)</label>
+    <input type="text" id="qr-name" placeholder="Ej: Mi web, QR tienda, Contacto trabajo..."/>
+  </div>
+
+  <!-- URL -->
+  <div id="f-url" class="fields" style="display:none">
+    <div class="form-grid single">
+      <div class="form-group">
+        <label>URL del sitio web</label>
+        <div class="input-icon-wrap"><span class="input-icon">🔗</span><input type="url" id="url-val" placeholder="https://tusitioweb.com"/></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VCARD -->
+  <div id="f-vcard" class="fields" style="display:none">
+    <div class="form-grid">
+      <div class="form-group"><label>Nombre</label><input type="text" id="vc-fname" placeholder="Juan"/></div>
+      <div class="form-group"><label>Apellido</label><input type="text" id="vc-lname" placeholder="Pérez"/></div>
+      <div class="form-group"><label>Teléfono móvil</label><input type="tel" id="vc-tel" placeholder="+591 700 00000"/></div>
+      <div class="form-group"><label>Teléfono trabajo</label><input type="tel" id="vc-tel2" placeholder="+591 2 000000"/></div>
+      <div class="form-group full"><label>Email</label><input type="email" id="vc-email" placeholder="juan@empresa.com"/></div>
+      <div class="form-group full"><label>Empresa</label><input type="text" id="vc-company" placeholder="Mi Empresa S.A."/></div>
+      <div class="form-group"><label>Cargo</label><input type="text" id="vc-title" placeholder="Director Comercial"/></div>
+      <div class="form-group"><label>Sitio web</label><input type="url" id="vc-web" placeholder="https://miweb.com"/></div>
+      <div class="form-group full"><label>Dirección</label><input type="text" id="vc-addr" placeholder="Av. Camacho 123, La Paz"/></div>
+    </div>
+  </div>
+
+  <!-- SOCIAL -->
+  <div id="f-social" class="fields" style="display:none">
+    <p style="font-size:13px;color:var(--mid);margin-bottom:16px">Agrega tus redes sociales. Solo rellena las que quieras mostrar.</p>
+    <div class="social-item"><div class="s-icon">📘</div><input type="url" id="s-fb" placeholder="https://facebook.com/tuperfil"/></div>
+    <div class="social-item"><div class="s-icon">📸</div><input type="url" id="s-ig" placeholder="https://instagram.com/tuperfil"/></div>
+    <div class="social-item"><div class="s-icon">🐦</div><input type="url" id="s-tw" placeholder="https://twitter.com/tuperfil"/></div>
+    <div class="social-item"><div class="s-icon">💼</div><input type="url" id="s-li" placeholder="https://linkedin.com/in/tuperfil"/></div>
+    <div class="social-item"><div class="s-icon">🎵</div><input type="url" id="s-tt" placeholder="https://tiktok.com/@tuperfil"/></div>
+    <div class="social-item"><div class="s-icon">▶️</div><input type="url" id="s-yt" placeholder="https://youtube.com/@tucanal"/></div>
+  </div>
+
+  <!-- EMPRESA -->
+  <div id="f-empresa" class="fields" style="display:none">
+    <div class="form-grid">
+      <div class="form-group full"><label>Nombre de la empresa</label><input type="text" id="emp-name" placeholder="Mi Empresa S.A."/></div>
+      <div class="form-group full"><label>Descripción</label><textarea id="emp-desc" placeholder="Breve descripción de tu empresa..."></textarea></div>
+      <div class="form-group"><label>Teléfono</label><input type="tel" id="emp-tel" placeholder="+591 2 000000"/></div>
+      <div class="form-group"><label>Email</label><input type="email" id="emp-email" placeholder="info@empresa.com"/></div>
+      <div class="form-group full"><label>Dirección</label><input type="text" id="emp-addr" placeholder="Av. Principal 123, La Paz"/></div>
+      <div class="form-group full"><label>Sitio web</label><input type="url" id="emp-web" placeholder="https://miempresa.com"/></div>
+    </div>
+  </div>
+
+  <!-- VIDEO -->
+  <div id="f-video" class="fields" style="display:none">
+    <div class="form-grid single">
+      <div class="form-group"><label>URL del video</label><div class="input-icon-wrap"><span class="input-icon">🎥</span><input type="url" id="vid-url" placeholder="https://youtube.com/watch?v=..."/></div><span class="sublabel">YouTube, Vimeo, o cualquier URL de video</span></div>
+      <div class="form-group"><label>Título del video (opcional)</label><input type="text" id="vid-title" placeholder="Mi video"/></div>
+    </div>
+  </div>
+
+  <!-- MP3 -->
+  <div id="f-mp3" class="fields" style="display:none">
+    <div class="form-grid single">
+      <div class="form-group"><label>URL del audio / podcast</label><div class="input-icon-wrap"><span class="input-icon">🎵</span><input type="url" id="mp3-url" placeholder="https://open.spotify.com/..."/></div><span class="sublabel">Spotify, SoundCloud, o enlace directo .mp3</span></div>
+      <div class="form-group"><label>Título (opcional)</label><input type="text" id="mp3-title" placeholder="Nombre de la canción o podcast"/></div>
+    </div>
+  </div>
+
+  <!-- APPS -->
+  <div id="f-apps" class="fields" style="display:none">
+    <div class="form-grid single">
+      <div class="form-group"><label>Link en App Store (iOS)</label><div class="input-icon-wrap"><span class="input-icon">🍎</span><input type="url" id="app-ios" placeholder="https://apps.apple.com/..."/></div></div>
+      <div class="form-group"><label>Link en Google Play (Android)</label><div class="input-icon-wrap"><span class="input-icon">🤖</span><input type="url" id="app-android" placeholder="https://play.google.com/store/apps/..."/></div></div>
+      <p style="font-size:12px;color:var(--light)">El QR detectará automáticamente el dispositivo y abrirá la tienda correcta.</p>
+    </div>
+  </div>
+
+  <!-- WHATSAPP -->
+  <div id="f-whatsapp" class="fields" style="display:none">
+    <div class="form-grid single">
+      <div class="form-group"><label>Número de WhatsApp</label><div class="input-icon-wrap"><span class="input-icon">💬</span><input type="tel" id="wa-tel" placeholder="+591 700 00000"/></div><span class="sublabel">Incluye el código de país. Ej: +591 para Bolivia</span></div>
+      <div class="form-group"><label>Mensaje predeterminado (opcional)</label><textarea id="wa-msg" placeholder="Hola, me interesa tu servicio..."></textarea></div>
+    </div>
+  </div>
+
+  <!-- EMAIL -->
+  <div id="f-email" class="fields" style="display:none">
+    <div class="form-grid single">
+      <div class="form-group"><label>Correo electrónico</label><div class="input-icon-wrap"><span class="input-icon">📧</span><input type="email" id="em-to" placeholder="contacto@empresa.com"/></div></div>
+      <div class="form-group"><label>Asunto (opcional)</label><input type="text" id="em-subject" placeholder="Consulta desde QR"/></div>
+      <div class="form-group"><label>Mensaje (opcional)</label><textarea id="em-body" placeholder="Hola, me contacto desde tu código QR..."></textarea></div>
+    </div>
+  </div>
+
+  <!-- TEL -->
+  <div id="f-tel" class="fields" style="display:none">
+    <div class="form-grid single">
+      <div class="form-group"><label>Número de teléfono</label><div class="input-icon-wrap"><span class="input-icon">📞</span><input type="tel" id="tel-val" placeholder="+591 700 00000"/></div><span class="sublabel">Incluye el código de país</span></div>
+    </div>
+  </div>
+
+  <!-- SMS -->
+  <div id="f-sms" class="fields" style="display:none">
+    <div class="form-grid single">
+      <div class="form-group"><label>Número de teléfono</label><div class="input-icon-wrap"><span class="input-icon">✉️</span><input type="tel" id="sms-tel" placeholder="+591 700 00000"/></div></div>
+      <div class="form-group"><label>Mensaje (opcional)</label><textarea id="sms-msg" placeholder="Hola!"></textarea></div>
+    </div>
+  </div>
+
+  <!-- WIFI -->
+  <div id="f-wifi" class="fields" style="display:none">
+    <div class="form-grid">
+      <div class="form-group full"><label>Nombre de la red (SSID)</label><input type="text" id="wifi-ssid" placeholder="MiRedWiFi"/></div>
+      <div class="form-group full"><label>Contraseña</label><input type="text" id="wifi-pass" placeholder="contraseña123"/></div>
+      <div class="form-group"><label>Tipo de seguridad</label><select id="wifi-sec"><option value="WPA">WPA / WPA2</option><option value="WEP">WEP</option><option value="nopass">Sin contraseña</option></select></div>
+      <div class="form-group" style="justify-content:flex-end;padding-top:20px">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+          <input type="checkbox" id="wifi-hidden" style="width:auto"/>
+          <span>Red oculta</span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAPS -->
+  <div id="f-maps" class="fields" style="display:none">
+    <div class="form-grid single">
+      <div class="form-group"><label>Dirección o lugar</label><div class="input-icon-wrap"><span class="input-icon">📍</span><input type="text" id="maps-val" placeholder="Av. Camacho 123, La Paz, Bolivia"/></div><span class="sublabel">Escribe la dirección exacta o nombre del lugar</span></div>
+    </div>
+  </div>
+
+  <!-- TEXT -->
+  <div id="f-text" class="fields" style="display:none">
+    <div class="form-grid single">
+      <div class="form-group"><label>Texto</label><textarea id="text-val" rows="5" placeholder="Escribe el mensaje que quieres mostrar cuando escaneen el QR..."></textarea><span class="sublabel">Máximo recomendado: 300 caracteres</span></div>
+    </div>
+  </div>
+
+  <!-- PDF -->
+  <div id="f-pdf" class="fields" style="display:none">
+    <div class="form-grid single">
+      <div class="form-group"><label>URL del PDF</label><div class="input-icon-wrap"><span class="input-icon">📑</span><input type="url" id="pdf-url" placeholder="https://miweb.com/documento.pdf"/></div><span class="sublabel">Enlace directo al archivo PDF</span></div>
+      <div class="form-group"><label>Título del documento (opcional)</label><input type="text" id="pdf-title" placeholder="Mi Catálogo 2025"/></div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn-secondary" onclick="goStep(1)">← Atrás</button>
+    <button class="btn-primary" onclick="goStep(3)">Siguiente →</button>
+  </div>
+</div>
+
+<!-- PANEL 3: DISEÑO -->
+<div class="panel" id="panel-3">
+  <div class="panel-title">3. Personaliza el diseño</div>
+  <div class="panel-sub">Dale tu toque personal al código QR.</div>
+  <div class="design-layout">
+    <div class="design-options">
+
+      <div class="design-section">
+        <div class="design-section-title">🎨 Colores</div>
+        <div class="color-grid">
+          <div class="color-item"><input type="color" id="c-fg" value="#000000" oninput="renderPreview()"/><span>Color QR</span></div>
+          <div class="color-item"><input type="color" id="c-bg" value="#ffffff" oninput="renderPreview()"/><span>Fondo</span></div>
+          <div class="color-item"><input type="color" id="c-eye" value="#000000" oninput="renderPreview()"/><span>Esquinas</span></div>
+        </div>
+      </div>
+
+      <div class="design-section">
+        <div class="design-section-title">⬛ Estilo de puntos</div>
+        <div class="dot-styles">
+          <div class="dot-style active" onclick="setDotStyle('square',this)" title="Cuadrado">
+            <svg viewBox="0 0 28 28"><rect x="4" y="4" width="8" height="8"/><rect x="16" y="4" width="8" height="8"/><rect x="4" y="16" width="8" height="8"/><rect x="16" y="16" width="8" height="8"/></svg>
+          </div>
+          <div class="dot-style" onclick="setDotStyle('rounded',this)" title="Redondeado">
+            <svg viewBox="0 0 28 28"><rect x="4" y="4" width="8" height="8" rx="3"/><rect x="16" y="4" width="8" height="8" rx="3"/><rect x="4" y="16" width="8" height="8" rx="3"/><rect x="16" y="16" width="8" height="8" rx="3"/></svg>
+          </div>
+          <div class="dot-style" onclick="setDotStyle('dots',this)" title="Círculos">
+            <svg viewBox="0 0 28 28"><circle cx="8" cy="8" r="4"/><circle cx="20" cy="8" r="4"/><circle cx="8" cy="20" r="4"/><circle cx="20" cy="20" r="4"/></svg>
           </div>
         </div>
-        <div class="form-group">
-          <label>Color de fondo</label>
-          <div class="color-row">
-            <input type="color" id="c-bg" value="#ffffff" oninput="updatePreview()" />
-            <span>Fondo del QR</span>
+      </div>
+
+      <div class="design-section">
+        <div class="design-section-title">🔲 Estilo de esquinas</div>
+        <div class="corner-styles">
+          <div class="corner-style active" onclick="setCornerStyle('square',this)" title="Cuadrado">
+            <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="4" y="4" width="20" height="20"/><rect x="8" y="8" width="12" height="12"/></svg>
+          </div>
+          <div class="corner-style" onclick="setCornerStyle('rounded',this)" title="Redondeado">
+            <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="4" y="4" width="20" height="20" rx="5"/><rect x="8" y="8" width="12" height="12" rx="3"/></svg>
+          </div>
+          <div class="corner-style" onclick="setCornerStyle('dots',this)" title="Círculo">
+            <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="14" cy="14" r="10"/><circle cx="14" cy="14" r="6"/></svg>
           </div>
         </div>
       </div>
-      <div class="preview-box">
-        <div class="preview-label">Vista previa</div>
-        <div id="qr-preview"><span style="font-size:12px;color:#94a3b8">Generando...</span></div>
+
+      <div class="design-section">
+        <div class="design-section-title">🖼 Logo en el centro (opcional)</div>
+        <div id="logo-upload-area">
+          <div class="logo-upload-box" onclick="document.getElementById('logo-file').click()">
+            <div style="font-size:28px">⬆️</div>
+            <p>Click para subir tu logo</p>
+            <p style="font-size:11px">PNG o JPG recomendado</p>
+          </div>
+          <input type="file" id="logo-file" accept="image/*" style="display:none" onchange="handleLogo(this)"/>
+        </div>
+        <div id="logo-preview-area" style="display:none">
+          <div class="logo-preview">
+            <img id="logo-img-preview" src="" alt="logo"/>
+            <span id="logo-filename">logo.png</span>
+            <button class="btn-remove-logo" onclick="removeLogo()">✕ Quitar</button>
+          </div>
+        </div>
       </div>
+
     </div>
-    <div class="btn-row">
-      <button class="btn-secondary" onclick="goStep(2)">← Atrás</button>
-      <button class="btn-primary" id="btn-save" onclick="saveAndFinish()">Guardar QR ✓</button>
+
+    <!-- PREVIEW -->
+    <div class="preview-sticky">
+      <div class="preview-card">
+        <div class="preview-card-title">Vista previa</div>
+        <div id="qr-canvas-wrap"><span style="font-size:12px;color:var(--light)">Generando...</span></div>
+        <div class="preview-name" id="prev-name">Mi QR</div>
+        <div class="preview-type" id="prev-type">URL</div>
+      </div>
     </div>
   </div>
 
-  <!-- STEP 4: LISTO -->
-  <div id="step-4" class="panel" style="display:none">
-    <div class="done-box">
-      <div class="done-icon">🎉</div>
-      <h2>¡Tu QR está listo!</h2>
-      <p>Descárgalo y úsalo donde quieras.</p>
-      <div id="final-qr"></div>
-      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-        <button class="btn-blue" onclick="downloadFinal()">⬇ Descargar PNG</button>
-        <a class="btn-outline" href="dashboard.html">Ver mis QRs</a>
-        <button class="btn-outline" onclick="resetForm()" style="border-color:#e2e8f0;color:#475569">＋ Crear otro</button>
-      </div>
+  <div class="btn-row">
+    <button class="btn-secondary" onclick="goStep(2)">← Atrás</button>
+    <button class="btn-primary" id="btn-save" onclick="saveAndFinish()">Guardar QR ✓</button>
+  </div>
+</div>
+
+<!-- PANEL 4: LISTO -->
+<div class="panel" id="panel-4">
+  <div class="done-wrap">
+    <span class="done-icon">🎉</span>
+    <h2>¡Tu QR está listo!</h2>
+    <p>Descárgalo en alta calidad y úsalo donde quieras.</p>
+    <div id="final-qr-wrap"></div>
+    <div class="done-actions">
+      <button class="btn-dl" onclick="downloadQR('png')">⬇ PNG</button>
+      <button class="btn-dl" onclick="downloadQR('svg')" style="background:#6366f1">⬇ SVG</button>
+      <a class="btn-outline" href="dashboard.html">Ver mis QRs</a>
+      <button class="btn-ghost" onclick="resetAll()">＋ Crear otro</button>
     </div>
   </div>
+</div>
+
 </main>
-
 <div class="toast" id="toast"></div>
 
 <script>
@@ -444,178 +683,290 @@ async function updateQR(qrId, updates) {
 <script>
   requireAuth();
 
-  let currentStep = 1;
-  let selectedType = null;
-  let selectedTypeLabel = '';
-  let selectedTypeIcon = '';
-  let qrPreviewInstance = null;
-  let finalQrInstance = null;
+  // STATE
+  let state = {
+    step: 1,
+    type: null, typeLabel: '', typeIcon: '',
+    content: '',
+    name: '',
+    color: '#000000', bgColor: '#ffffff', eyeColor: '#000000',
+    dotStyle: 'square', cornerStyle: 'square',
+    logoDataUrl: null,
+    qrInstance: null
+  };
 
-  function showToast(msg) {
+  // TOAST
+  function toast(msg, dur=2500) {
     const t = document.getElementById('toast');
     t.textContent = msg; t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2500);
+    setTimeout(() => t.classList.remove('show'), dur);
   }
 
-  function updateStepIndicator(step) {
-    for (let i = 1; i <= 4; i++) {
-      const dot = document.getElementById(`dot-${i}`);
-      if (i < step) { dot.className = 'step-dot done'; dot.textContent = '✓'; }
-      else if (i === step) { dot.className = 'step-dot active'; dot.textContent = i < 4 ? i : '✓'; }
-      else { dot.className = 'step-dot'; dot.textContent = i < 4 ? i : '✓'; }
+  // PROGRESS
+  function updateProgress(step) {
+    state.step = step;
+    const pct = [(0),(33),(66),(100)][step-1];
+    document.getElementById('prog-fill').style.width = pct + '%';
+    for (let i=1;i<=4;i++) {
+      const sc = document.getElementById('sc-'+i);
+      const sn = document.getElementById('sn-'+i);
+      sc.className = 'step-circle' + (i<step?' done':i===step?' active':'');
+      sn.className = 'step-name' + (i<step?' done':i===step?' active':'');
+      if (i < step) sc.textContent = '✓';
+      else sc.textContent = i < 4 ? i : '✓';
     }
-    for (let i = 1; i <= 3; i++) {
-      document.getElementById(`line-${i}`).className = 'step-line' + (i < step ? ' done' : '');
-    }
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-'+step).classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
   }
 
-  function selectType(type, label, icon) {
-    selectedType = type;
-    selectedTypeLabel = label;
-    selectedTypeIcon = icon;
-    document.querySelectorAll('.type-item').forEach(el => el.classList.remove('selected'));
+  // STEP 1
+  function selectType(type, label, icon, desc) {
+    state.type = type; state.typeLabel = label; state.typeIcon = icon;
+    document.querySelectorAll('.type-card').forEach(c => c.classList.remove('selected'));
     event.currentTarget.classList.add('selected');
-    setTimeout(() => goStep(2), 200);
+    document.getElementById('prev-type').textContent = label;
+    setTimeout(() => goStep(2), 180);
   }
 
+  // STEP 2
   function goStep(step) {
-    if (step === 2 && !selectedType) return showToast('Selecciona un tipo de QR');
+    if (step === 2 && !state.type) return toast('Selecciona un tipo de QR');
     if (step === 3) {
       const name = document.getElementById('qr-name').value.trim();
-      if (!name) return showToast('Ponle un nombre a tu QR');
-      const content = getContent();
-      if (!content) return showToast('Completa los campos requeridos');
-      updatePreview();
+      if (!name) return toast('Ponle un nombre a tu QR');
+      const content = buildContent();
+      if (!content) return toast('Completa los campos requeridos');
+      state.name = name;
+      state.content = content;
+      document.getElementById('prev-name').textContent = name;
+      document.querySelectorAll('.fields').forEach(f => f.style.display='none');
+      if (state.type) document.getElementById('f-'+state.type).style.display='block';
+      renderPreview();
     }
-    for (let i = 1; i <= 4; i++) document.getElementById(`step-${i}`).style.display = 'none';
-    document.getElementById(`step-${step}`).style.display = 'block';
-    currentStep = step;
-    updateStepIndicator(step);
-
     if (step === 2) {
-      document.querySelectorAll('.fields').forEach(f => f.style.display = 'none');
-      const f = document.getElementById(`fields-${selectedType}`);
+      document.getElementById('p2-title').textContent = '2. Contenido — ' + state.typeLabel;
+      document.getElementById('p2-sub').textContent = 'Rellena los datos para tu QR de ' + state.typeLabel + '.';
+      document.querySelectorAll('.fields').forEach(f => f.style.display='none');
+      const f = document.getElementById('f-'+state.type);
       if (f) f.style.display = 'block';
-      document.getElementById('step2-sub').textContent = `Ingresa los datos para tu QR de ${selectedTypeLabel}.`;
     }
-
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    updateProgress(step);
   }
 
-  function getContent() {
-    switch (selectedType) {
-      case 'url': return document.getElementById('f-url').value.trim();
+  // BUILD CONTENT
+  function buildContent() {
+    const g = id => document.getElementById(id)?.value?.trim() || '';
+    switch(state.type) {
+      case 'url': return g('url-val') || null;
       case 'vcard': {
-        const n = document.getElementById('f-vcard-name').value.trim();
-        const t = document.getElementById('f-vcard-tel').value.trim();
-        const e = document.getElementById('f-vcard-email').value.trim();
-        const c = document.getElementById('f-vcard-company').value.trim();
-        const w = document.getElementById('f-vcard-web').value.trim();
-        if (!n) return null;
-        return `BEGIN:VCARD\nVERSION:3.0\nFN:${n}\nTEL:${t}\nEMAIL:${e}\nORG:${c}\nURL:${w}\nEND:VCARD`;
+        const fn = g('vc-fname'); if (!fn) return null;
+        return `BEGIN:VCARD\nVERSION:3.0\nN:${g('vc-lname')};${fn}\nFN:${fn} ${g('vc-lname')}\nTEL;TYPE=CELL:${g('vc-tel')}\nTEL;TYPE=WORK:${g('vc-tel2')}\nEMAIL:${g('vc-email')}\nORG:${g('vc-company')}\nTITLE:${g('vc-title')}\nURL:${g('vc-web')}\nADR:;;${g('vc-addr')};;;;\nEND:VCARD`;
       }
-      case 'text': return document.getElementById('f-text').value.trim();
-      case 'email': {
-        const em = document.getElementById('f-email').value.trim();
-        if (!em) return null;
-        const sub = document.getElementById('f-email-subject').value.trim();
-        const body = document.getElementById('f-email-body').value.trim();
-        let mailto = `mailto:${em}`;
-        const params = [];
-        if (sub) params.push(`subject=${encodeURIComponent(sub)}`);
-        if (body) params.push(`body=${encodeURIComponent(body)}`);
-        if (params.length) mailto += '?' + params.join('&');
-        return mailto;
+      case 'social': {
+        const links = [
+          g('s-fb'), g('s-ig'), g('s-tw'), g('s-li'), g('s-tt'), g('s-yt')
+        ].filter(Boolean);
+        return links.length ? links[0] : null; // QR apunta al primer link principal
       }
-      case 'tel': {
-        const t = document.getElementById('f-tel').value.trim();
-        return t ? `tel:${t}` : null;
+      case 'empresa': {
+        const n = g('emp-name'); if (!n) return null;
+        const parts = [n, g('emp-desc'), g('emp-tel'), g('emp-email'), g('emp-addr'), g('emp-web')].filter(Boolean);
+        return parts.join('\n');
       }
-      case 'wifi': {
-        const ssid = document.getElementById('f-wifi-ssid').value.trim();
-        if (!ssid) return null;
-        const pass = document.getElementById('f-wifi-pass').value.trim();
-        const sec = document.getElementById('f-wifi-sec').value;
-        return `WIFI:T:${sec};S:${ssid};P:${pass};;`;
+      case 'video': return g('vid-url') || null;
+      case 'mp3': return g('mp3-url') || null;
+      case 'apps': {
+        const ios = g('app-ios'), android = g('app-android');
+        return ios || android || null;
       }
       case 'whatsapp': {
-        const tel = document.getElementById('f-wa-tel').value.trim().replace(/\D/g, '');
-        if (!tel) return null;
-        const msg = document.getElementById('f-wa-msg').value.trim();
-        return `https://wa.me/${tel}${msg ? '?text=' + encodeURIComponent(msg) : ''}`;
+        const tel = g('wa-tel').replace(/\D/g,''); if (!tel) return null;
+        const msg = g('wa-msg');
+        return `https://wa.me/${tel}${msg ? '?text='+encodeURIComponent(msg) : ''}`;
+      }
+      case 'email': {
+        const to = g('em-to'); if (!to) return null;
+        const params = [];
+        if (g('em-subject')) params.push('subject='+encodeURIComponent(g('em-subject')));
+        if (g('em-body')) params.push('body='+encodeURIComponent(g('em-body')));
+        return `mailto:${to}${params.length ? '?'+params.join('&') : ''}`;
+      }
+      case 'tel': return g('tel-val') ? `tel:${g('tel-val')}` : null;
+      case 'sms': {
+        const t = g('sms-tel'); if (!t) return null;
+        const m = g('sms-msg');
+        return `sms:${t}${m ? '?body='+encodeURIComponent(m) : ''}`;
+      }
+      case 'wifi': {
+        const ssid = g('wifi-ssid'); if (!ssid) return null;
+        const pass = g('wifi-pass');
+        const sec = document.getElementById('wifi-sec').value;
+        const hidden = document.getElementById('wifi-hidden').checked ? 'true' : 'false';
+        return `WIFI:T:${sec};S:${ssid};P:${pass};H:${hidden};;`;
       }
       case 'maps': {
-        const addr = document.getElementById('f-maps').value.trim();
-        return addr ? `https://maps.google.com/?q=${encodeURIComponent(addr)}` : null;
+        const addr = g('maps-val'); if (!addr) return null;
+        return `https://maps.google.com/?q=${encodeURIComponent(addr)}`;
       }
+      case 'text': return g('text-val') || null;
+      case 'pdf': return g('pdf-url') || null;
     }
     return null;
   }
 
-  function updatePreview() {
-    const fg = document.getElementById('c-fg').value;
-    const bg = document.getElementById('c-bg').value;
-    const content = getContent() || 'https://creaQR.com';
-    const container = document.getElementById('qr-preview');
-    container.innerHTML = '';
-    qrPreviewInstance = new QRCode(container, {
-      text: content, width: 160, height: 160,
+  // RENDER QR PREVIEW
+  function renderPreview() {
+    const content = state.content || buildContent() || 'https://creaQR.com';
+    const fg = document.getElementById('c-fg')?.value || '#000000';
+    const bg = document.getElementById('c-bg')?.value || '#ffffff';
+    state.color = fg; state.bgColor = bg;
+    state.eyeColor = document.getElementById('c-eye')?.value || '#000000';
+
+    const wrap = document.getElementById('qr-canvas-wrap');
+    wrap.innerHTML = '';
+    state.qrInstance = new QRCode(wrap, {
+      text: content, width: 200, height: 200,
       colorDark: fg, colorLight: bg,
       correctLevel: QRCode.CorrectLevel.H
     });
+
+    // Overlay logo if exists
+    if (state.logoDataUrl) {
+      setTimeout(() => overlayLogo(wrap, state.logoDataUrl), 150);
+    }
   }
 
+  function overlayLogo(wrap, dataUrl) {
+    const canvas = wrap.querySelector('canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const logo = new Image();
+    logo.onload = () => {
+      const size = canvas.width * 0.22;
+      const x = (canvas.width - size) / 2;
+      const y = (canvas.height - size) / 2;
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.roundRect(x-4, y-4, size+8, size+8, 8);
+      ctx.fill();
+      ctx.drawImage(logo, x, y, size, size);
+    };
+    logo.src = dataUrl;
+  }
+
+  // DOT / CORNER STYLES
+  function setDotStyle(style, el) {
+    state.dotStyle = style;
+    document.querySelectorAll('.dot-style').forEach(e => e.classList.remove('active'));
+    el.classList.add('active');
+    renderPreview();
+  }
+  function setCornerStyle(style, el) {
+    state.cornerStyle = style;
+    document.querySelectorAll('.corner-style').forEach(e => e.classList.remove('active'));
+    el.classList.add('active');
+    renderPreview();
+  }
+
+  // LOGO
+  function handleLogo(input) {
+    const file = input.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      state.logoDataUrl = e.target.result;
+      document.getElementById('logo-img-preview').src = e.target.result;
+      document.getElementById('logo-filename').textContent = file.name;
+      document.getElementById('logo-upload-area').style.display = 'none';
+      document.getElementById('logo-preview-area').style.display = 'block';
+      renderPreview();
+    };
+    reader.readAsDataURL(file);
+  }
+  function removeLogo() {
+    state.logoDataUrl = null;
+    document.getElementById('logo-file').value = '';
+    document.getElementById('logo-upload-area').style.display = 'block';
+    document.getElementById('logo-preview-area').style.display = 'none';
+    renderPreview();
+  }
+
+  // SAVE
   async function saveAndFinish() {
     const btn = document.getElementById('btn-save');
     btn.disabled = true; btn.textContent = 'Guardando...';
-    const content = getContent();
-    const name = document.getElementById('qr-name').value.trim();
-    const fg = document.getElementById('c-fg').value;
-    const bg = document.getElementById('c-bg').value;
     try {
-      await saveQR({ name, type: selectedTypeLabel, content, color: fg, bgColor: bg, icon: selectedTypeIcon });
+      await saveQR({
+        name: state.name, type: state.typeLabel, icon: state.typeIcon,
+        content: state.content, color: state.color, bgColor: state.bgColor
+      });
       goStep(4);
-      // Generar QR final grande
       setTimeout(() => {
-        const container = document.getElementById('final-qr');
-        container.innerHTML = '';
-        finalQrInstance = new QRCode(container, {
-          text: content, width: 200, height: 200,
-          colorDark: fg, colorLight: bg,
+        const wrap = document.getElementById('final-qr-wrap');
+        wrap.innerHTML = '';
+        const inst = new QRCode(wrap, {
+          text: state.content, width: 220, height: 220,
+          colorDark: state.color, colorLight: state.bgColor,
           correctLevel: QRCode.CorrectLevel.H
         });
+        if (state.logoDataUrl) setTimeout(() => overlayLogo(wrap, state.logoDataUrl), 200);
       }, 200);
-      showToast('¡QR guardado exitosamente! ✓');
+      toast('¡QR guardado! ✓');
     } catch(e) {
-      showToast('Error al guardar. Intenta de nuevo.');
+      toast('Error al guardar. Intenta de nuevo.');
       btn.disabled = false; btn.textContent = 'Guardar QR ✓';
     }
   }
 
-  function downloadFinal() {
-    const canvas = document.querySelector('#final-qr canvas');
-    if (!canvas) return showToast('Espera un momento...');
-    const big = document.createElement('canvas');
-    big.width = 600; big.height = 600;
-    const ctx = big.getContext('2d');
-    ctx.fillStyle = document.getElementById('c-bg').value;
-    ctx.fillRect(0, 0, 600, 600);
-    ctx.drawImage(canvas, 0, 0, 600, 600);
-    const link = document.createElement('a');
-    link.download = `${document.getElementById('qr-name').value || 'qr'}.png`;
-    link.href = big.toDataURL('image/png');
-    link.click();
-    showToast('QR descargado ✓');
+  // DOWNLOAD
+  function downloadQR(fmt) {
+    const canvas = document.querySelector('#final-qr-wrap canvas');
+    if (!canvas) return toast('Espera un momento...');
+    if (fmt === 'png') {
+      const big = document.createElement('canvas');
+      big.width = 1000; big.height = 1000;
+      const ctx = big.getContext('2d');
+      ctx.fillStyle = state.bgColor;
+      ctx.fillRect(0,0,1000,1000);
+      ctx.drawImage(canvas,0,0,1000,1000);
+      if (state.logoDataUrl) {
+        const logo = new Image();
+        logo.onload = () => {
+          const size = 220; const x = 390; const y = 390;
+          ctx.fillStyle='#fff'; ctx.beginPath();
+          ctx.roundRect(x-8,y-8,size+16,size+16,12); ctx.fill();
+          ctx.drawImage(logo,x,y,size,size);
+          const a = document.createElement('a');
+          a.download = (state.name||'qr')+'.png';
+          a.href = big.toDataURL('image/png'); a.click();
+        };
+        logo.src = state.logoDataUrl;
+      } else {
+        const a = document.createElement('a');
+        a.download = (state.name||'qr')+'.png';
+        a.href = big.toDataURL('image/png'); a.click();
+      }
+    } else {
+      // SVG básico
+      const svgData = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><image href="${canvas.toDataURL()}" width="400" height="400"/></svg>`;
+      const blob = new Blob([svgData],{type:'image/svg+xml'});
+      const a = document.createElement('a');
+      a.download = (state.name||'qr')+'.svg';
+      a.href = URL.createObjectURL(blob); a.click();
+    }
+    toast('Descargando... ✓');
   }
 
-  function resetForm() {
-    selectedType = null;
-    document.querySelectorAll('.type-item').forEach(el => el.classList.remove('selected'));
-    document.getElementById('qr-name').value = '';
-    document.querySelectorAll('input:not([type="color"]), textarea').forEach(el => { if(el.id !== 'qr-name') el.value = ''; });
-    document.getElementById('c-fg').value = '#000000';
-    document.getElementById('c-bg').value = '#ffffff';
-    goStep(1);
+  // RESET
+  function resetAll() {
+    state = { step:1, type:null, typeLabel:'', typeIcon:'', content:'', name:'', color:'#000000', bgColor:'#ffffff', eyeColor:'#000000', dotStyle:'square', cornerStyle:'square', logoDataUrl:null, qrInstance:null };
+    document.querySelectorAll('input[type=text],input[type=url],input[type=email],input[type=tel],textarea').forEach(el => el.value='');
+    document.getElementById('c-fg').value='#000000';
+    document.getElementById('c-bg').value='#ffffff';
+    document.getElementById('c-eye').value='#000000';
+    removeLogo();
+    document.querySelectorAll('.type-card').forEach(c=>c.classList.remove('selected'));
+    updateProgress(1);
   }
 </script>
 </body>
